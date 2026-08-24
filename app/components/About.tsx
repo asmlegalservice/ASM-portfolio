@@ -247,7 +247,7 @@ export default function About() {
                     {/* Portrait Frame Crop */}
                     <div className="relative w-[180px] h-[200px] sm:w-[240px] sm:h-[240px] lg:w-[250px] lg:h-[250px] max-w-full rounded-[140px] overflow-hidden bg-slate-navy shadow-inner">
                       <Image
-                        src="/abdulesir1.png"
+                        src="/aboutimage.jpeg"
                         alt="Adv. Abdul Mulla"
                         fill
                         className="object-cover object-top"
