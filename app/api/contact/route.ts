@@ -122,9 +122,10 @@ function buildAutoReplyEmail(data: ContactBody) {
           </div>
           <div class="body">
             <p>Dear <span class="highlight">${firstName}</span>,</p>
-            <p>Thank you for reaching out through our website. Your message has been received and is important to us.</p>
-            <p>We will review your inquiry carefully and get back to you within <span class="highlight">24–48 business hours</span>. If your matter is urgent, please feel free to contact us directly at our office.</p>
-            <p>We appreciate your trust and look forward to assisting you.</p>
+            <p>Thank you for submitting your consultation request through our website.</p>
+            <p>Your request has been successfully received. We appreciate you taking the time to reach out to us.</p>
+            <p>You may contact us at <a href="tel:9370072022" style="color: #1A2B3C; font-weight: 700; text-decoration: none;"><strong>9370072022</strong></a> <strong>between 11:00 AM to 6:00 PM</strong>. Kindly note that <strong>11:00 AM to 3:00 PM are court working hours</strong>; therefore, for non-urgent matters, we request you to preferably call after 3:00 PM.</p>
+            <p>Thank you for your understanding. We look forward to assisting you.</p>
             <div class="signature">
               <p class="name">Adv. Abdul Mulla</p>
               <p class="title">Advocate, Bar Council of Maharashtra & Goa</p>
@@ -132,8 +133,10 @@ function buildAutoReplyEmail(data: ContactBody) {
             </div>
           </div>
           <div class="footer">
-            <p>Krystal Square, Tarabai Park, Kolhapur, Maharashtra 416003</p>
-            <a href="mailto:contact@advabdulmulla.com">contact@advabdulmulla.com</a>
+            <p>Unit No. 409, 4th Floor,
+Krystal Square, E-Ward, Nagala Park,
+Near Khanvilkar Pump, Kolhapur - 416003</p>
+            <a href="mailto:adv.abduloffice@gmail.com">adv.abduloffice@gmail.com</a>
           </div>
         </div>
       </body>

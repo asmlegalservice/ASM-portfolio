@@ -206,8 +206,8 @@ export default function Contact() {
             {/* BACK SIDE (Dark Theme - Contact Details Frosted Blur Reveal) */}
             <div
               className={`absolute inset-0 w-full h-full p-6 sm:p-8 md:p-10 bg-[#0B1520]/95 backdrop-blur-md text-white border border-white/10 shadow-[0_8px_40px_rgba(11,21,32,0.12)] flex flex-col justify-between overflow-hidden transition-all duration-500 ${isCardActive
-                  ? "opacity-100 pointer-events-auto scale-100"
-                  : "opacity-0 pointer-events-none scale-95"
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95"
                 } group-hover:opacity-100 group-hover:pointer-events-auto group-hover:scale-100 z-20`}
             >
               {/* Background accent glow */}
