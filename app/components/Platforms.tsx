@@ -20,7 +20,7 @@ const PLATFORMS = [
     description: "A dedicated platform for guidance in divorce and family law matters.",
     cta: "Visit Website",
     image: "/know divorce.png",
-    link: "https://knowdivorce.in/"
+    link: "https://www.knowdivorce.in/"
   }
 ];
 
@@ -119,7 +119,7 @@ export default function Platforms() {
 
           {/* ADVOCATE TAB */}
           {activeTab === "advocate" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-15 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 animate-fade-in">
               {PLATFORMS.map((p) => (
                 <article
                   key={p.title}
