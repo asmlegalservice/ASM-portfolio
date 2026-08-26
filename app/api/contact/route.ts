@@ -105,10 +105,10 @@ function buildAutoReplyEmail(data: ContactBody) {
           .body { padding: 35px 30px; color: #333; line-height: 1.8; font-size: 14px; }
           .body p { margin: 0 0 16px; }
           .highlight { color: #C5A059; font-weight: 600; }
-          .divider { height: 1px; background: linear-gradient(to right, transparent, #E5E1D8, transparent); margin: 24px 0; }
           .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #f0ede6; }
           .signature .name { font-size: 16px; color: #1A2B3C; font-weight: 700; margin: 0; }
-          .signature .title { font-size: 12px; color: #888; margin: 4px 0 0; }
+          .signature .phone { font-size: 13px; color: #1A2B3C; margin: 6px 0 0; }
+          .signature .phone a { color: #1A2B3C; text-decoration: none; font-weight: 600; }
           .footer { padding: 20px 30px; background: #FAF8F5; text-align: center; }
           .footer p { font-size: 11px; color: #999; margin: 0 0 8px; }
           .footer a { color: #C5A059; text-decoration: none; font-size: 11px; }
@@ -128,14 +128,11 @@ function buildAutoReplyEmail(data: ContactBody) {
             <p>Thank you for your understanding. We look forward to assisting you.</p>
             <div class="signature">
               <p class="name">Adv. Abdul Mulla</p>
-              <p class="title">Advocate, Bar Council of Maharashtra & Goa</p>
-              <p class="title">Author — Life and Law | Magic Mindset</p>
+              <p class="phone"><a href="tel:9370072022" style="color: #1A2B3C; text-decoration: none; font-weight: 600;">📞 9370072022</a></p>
             </div>
           </div>
           <div class="footer">
-            <p>Unit No. 409, 4th Floor,
-Krystal Square, E-Ward, Nagala Park,
-Near Khanvilkar Pump, Kolhapur - 416003</p>
+            <p>Unit No. 409, 4th Floor, Krystal Square, E-Ward, Nagala Park, Near Khanvilkar Pump, Kolhapur - 416003</p>
             <a href="mailto:adv.abduloffice@gmail.com">adv.abduloffice@gmail.com</a>
           </div>
         </div>
