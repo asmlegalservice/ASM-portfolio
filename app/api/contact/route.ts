@@ -124,11 +124,11 @@ function buildAutoReplyEmail(data: ContactBody) {
             <p>Dear <span class="highlight">${firstName}</span>,</p>
             <p>Thank you for submitting your consultation request through our website.</p>
             <p>Your request has been successfully received. We appreciate you taking the time to reach out to us.</p>
-            <p>You may contact us at <a href="tel:9370072022" style="color: #1A2B3C; font-weight: 700; text-decoration: none;"><strong>9370072022</strong></a> <strong>between 11:00 AM to 6:00 PM</strong>. Kindly note that <strong>11:00 AM to 3:00 PM are court working hours</strong>; therefore, for non-urgent matters, we request you to preferably call after 3:00 PM.</p>
+            <p>You may contact us at <a href="tel:9370072022" style="color: #1A2B3C; font-weight: 700; text-decoration: none;"><strong>+91 93 7007 2022</strong></a> <strong>between 11:00 AM to 6:00 PM</strong>. Kindly note that <strong>11:00 AM to 3:00 PM are court working hours</strong>; therefore, for non-urgent matters, we request you to preferably call after 3:00 PM.</p>
             <p>Thank you for your understanding. We look forward to assisting you.</p>
             <div class="signature">
               <p class="name">Adv. Abdul Mulla</p>
-              <p class="phone"><a href="tel:9370072022" style="color: #1A2B3C; text-decoration: none; font-weight: 600;">📞 9370072022</a></p>
+              <p class="phone"><a href="tel:9370072022" style="color: #1A2B3C; text-decoration: none; font-weight: 600;">📞 +91 93 7007 2022</a></p>
             </div>
           </div>
           <div class="footer">
@@ -156,10 +156,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.trim())) {
       return NextResponse.json(
         { error: "Please provide a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    // Validate phone format (if provided)
+    if (body.phone && body.phone.trim()) {
+      const phoneClean = body.phone.trim();
+      if (!/^\d{10}$/.test(phoneClean)) {
+        return NextResponse.json(
+          { error: "Phone number must be exactly 10 digits." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Validate message length limit
+    if (message.trim().length > 1000) {
+      return NextResponse.json(
+        { error: "Message must not exceed 1000 characters." },
         { status: 400 }
       );
     }
