@@ -14,6 +14,8 @@ interface FormData {
 
 type FormStatus = "idle" | "sending" | "success" | "error";
 
+const MAX_MESSAGE_LENGTH = 1000;
+
 export default function Contact() {
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -22,6 +24,8 @@ export default function Contact() {
     phone: "",
     message: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const sectionRef = useRef<HTMLElement>(null);
@@ -42,14 +46,96 @@ export default function Contact() {
     return () => observer.disconnect();
   }, []);
 
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case "firstName":
+        if (!value.trim()) return "First name is required.";
+        return "";
+      case "lastName":
+        if (!value.trim()) return "Last name is required.";
+        return "";
+      case "email": {
+        if (!value.trim()) return "Email address is required.";
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(value.trim())) {
+          return "Please enter a valid email address (e.g. name@example.com).";
+        }
+        return "";
+      }
+      case "phone": {
+        if (!value.trim()) return "";
+        if (!/^\d{10}$/.test(value.trim())) {
+          return "Phone number must be exactly 10 digits.";
+        }
+        return "";
+      }
+      case "message":
+        if (!value.trim()) return "Message is required.";
+        if (value.length > MAX_MESSAGE_LENGTH) {
+          return `Message cannot exceed ${MAX_MESSAGE_LENGTH} characters.`;
+        }
+        return "";
+      default:
+        return "";
+    }
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    
+    // For phone number: only allow numbers, strip any letters/symbols, limit to 10 digits
+    let updatedValue = value;
+    if (name === "phone") {
+      updatedValue = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: updatedValue }));
+
+    if (touched[name]) {
+      const fieldError = validateField(name, updatedValue);
+      setErrors((prev) => ({ ...prev, [name]: fieldError }));
+    }
+  };
+
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const fieldError = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: fieldError }));
+  };
+
+  const validateAll = (): boolean => {
+    const newErrors: Record<string, string> = {
+      firstName: validateField("firstName", formData.firstName),
+      lastName: validateField("lastName", formData.lastName),
+      email: validateField("email", formData.email),
+      phone: validateField("phone", formData.phone),
+      message: validateField("message", formData.message),
+    };
+
+    setErrors(newErrors);
+    setTouched({
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      message: true,
+    });
+
+    return !Object.values(newErrors).some((err) => Boolean(err));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateAll()) {
+      return;
+    }
+
     setStatus("sending");
     setErrorMsg("");
 
@@ -74,6 +160,8 @@ export default function Contact() {
         phone: "",
         message: "",
       });
+      setTouched({});
+      setErrors({});
 
       // Reset status to idle after 6 seconds
       setTimeout(() => setStatus("idle"), 6000);
@@ -341,10 +429,23 @@ export default function Contact() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="Enter first name"
-                      className="w-full font-body bg-[#FAF8F5]/50 border border-soft-border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                      className={`w-full font-body bg-[#FAF8F5]/50 border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 ${
+                        touched.firstName && errors.firstName
+                          ? "border-red-400 focus:border-red-500 focus:bg-white focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                          : "border-soft-border focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                      }`}
                     />
+                    {touched.firstName && errors.firstName && (
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-500 font-body">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
                   <div className="relative">
                     <label
@@ -359,10 +460,23 @@ export default function Contact() {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="Enter last name"
-                      className="w-full font-body bg-[#FAF8F5]/50 border border-soft-border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                      className={`w-full font-body bg-[#FAF8F5]/50 border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 ${
+                        touched.lastName && errors.lastName
+                          ? "border-red-400 focus:border-red-500 focus:bg-white focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                          : "border-soft-border focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                      }`}
                     />
+                    {touched.lastName && errors.lastName && (
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-500 font-body">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        {errors.lastName}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -373,7 +487,7 @@ export default function Contact() {
                       htmlFor="contact-email"
                       className="block font-body text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-wider text-slate-navy/60 mb-1.5 sm:mb-2"
                     >
-                      Email Address
+                      Email Address <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-navy/35">
@@ -387,11 +501,24 @@ export default function Contact() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         required
-                        placeholder="Enter email"
-                        className="w-full font-body bg-[#FAF8F5]/50 border border-soft-border text-[13px] sm:text-sm text-slate-navy rounded-lg pl-10 sm:pl-11 pr-3.5 sm:pr-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                        placeholder="Enter email (e.g. name@example.com)"
+                        className={`w-full font-body bg-[#FAF8F5]/50 border text-[13px] sm:text-sm text-slate-navy rounded-lg pl-10 sm:pl-11 pr-3.5 sm:pr-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 ${
+                          touched.email && errors.email
+                            ? "border-red-400 focus:border-red-500 focus:bg-white focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                            : "border-soft-border focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                        }`}
                       />
                     </div>
+                    {touched.email && errors.email && (
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-500 font-body">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div className="relative">
                     <label
@@ -412,31 +539,74 @@ export default function Contact() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="Enter phone number"
-                        className="w-full font-body bg-[#FAF8F5]/50 border border-soft-border text-[13px] sm:text-sm text-slate-navy rounded-lg pl-10 sm:pl-11 pr-3.5 sm:pr-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                        onBlur={handleBlur}
+                        maxLength={10}
+                        inputMode="numeric"
+                        pattern="[0-9]{10}"
+                        placeholder="Enter 10-digit mobile number"
+                        className={`w-full font-body bg-[#FAF8F5]/50 border text-[13px] sm:text-sm text-slate-navy rounded-lg pl-10 sm:pl-11 pr-3.5 sm:pr-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 ${
+                          touched.phone && errors.phone
+                            ? "border-red-400 focus:border-red-500 focus:bg-white focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                            : "border-soft-border focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                        }`}
                       />
                     </div>
+                    {touched.phone && errors.phone && (
+                      <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-500 font-body">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        {errors.phone}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Message */}
                 <div className="relative">
-                  <label
-                    htmlFor="contact-message"
-                    className="block font-body text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-wider text-slate-navy/60 mb-1.5 sm:mb-2"
-                  >
-                    Your Message
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                    <label
+                      htmlFor="contact-message"
+                      className="block font-body text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] sm:tracking-wider text-slate-navy/60"
+                    >
+                      Your Message <span className="text-red-400">*</span>
+                    </label>
+                    <span
+                      className={`text-[10px] sm:text-[11px] font-body transition-colors ${
+                        formData.message.length >= MAX_MESSAGE_LENGTH
+                          ? "text-red-500 font-semibold"
+                          : formData.message.length >= MAX_MESSAGE_LENGTH * 0.9
+                          ? "text-amber-600 font-medium"
+                          : "text-slate-navy/40"
+                      }`}
+                    >
+                      {formData.message.length} / {MAX_MESSAGE_LENGTH} characters
+                    </span>
+                  </div>
                   <textarea
                     id="contact-message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     required
                     rows={4}
+                    maxLength={MAX_MESSAGE_LENGTH}
                     placeholder="Briefly describe your legal query or requirement..."
-                    className="w-full font-body bg-[#FAF8F5]/50 border border-soft-border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20 resize-none"
+                    className={`w-full font-body bg-[#FAF8F5]/50 border text-[13px] sm:text-sm text-slate-navy rounded-lg px-3.5 sm:px-4 py-3 sm:py-3.5 outline-none transition-colors duration-300 resize-none ${
+                      touched.message && errors.message
+                        ? "border-red-400 focus:border-red-500 focus:bg-white focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+                        : "border-soft-border focus:border-muted-gold focus:bg-white focus:shadow-[0_0_15px_rgba(197,160,89,0.06)] hover:border-slate-navy/20"
+                    }`}
                   />
+                  {touched.message && errors.message && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-red-500 font-body">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      {errors.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
